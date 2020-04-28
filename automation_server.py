@@ -2,11 +2,10 @@ import socket
 import time
 import sys
 
-def scan():
+def scan(duration):
 	''' Run tcpdump network scan '''
-	duration = 4 # Scan time in seconds
 	file_name = 'bot' # File name, top or bottom depending on LAN tap
-	interface = 'ens33' # Hardcode for each device?
+	interface = 'ens33' # Hardcode for each device
 	subprocess.run(['sudo','timeout',str(duration)+'s', 'tcpdump', '-i', interface, '-s', '65535', '-w', file_name+'.pcap'])
 	return
 
@@ -20,7 +19,7 @@ def startServer():
 	sock.listen(1) # Listen for connections
 	return sock
 
-def listen(sock):
+def listen(sock, duration):
 	''' Listen for incoming connection '''
 	while True:
 		print('Waiting for connection')
@@ -31,8 +30,11 @@ def listen(sock):
 			print(f'Received: {data}')
 			if data: # If data not empty reply then start scan
 				connection.sendall(b'SCAN')
-				# scan()
-				print("SCANNING\n\n") # Testing purposes
+				print(f"Begining scan: Duration {duration} seconds")
+				scan(duration)
+				# print("SCANNING\n\n") # Testing purposes
+				print("Scan complete")
+				
 			else:
 				break
 		finally:
@@ -41,8 +43,10 @@ def listen(sock):
 			return
 
 def main():
+	duration = 4 # Scan time in seconds
+
 	sock = startServer()
-	listen(sock)
+	listen(sock, duration)
 	return main()
 
 if __name__ == '__main__':

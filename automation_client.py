@@ -4,6 +4,9 @@ import socket
 import time
 import sys
 
+# First run:
+#    set IP address, set interface, generate ssh key server, install ssh key on client 
+#    https://adamdehaven.com/blog/how-to-generate-an-ssh-key-and-add-your-public-key-to-the-server-for-authentication/
 # Ping Light
 # Send start scan msg to server
 # Client and server begin scan
@@ -15,9 +18,8 @@ import sys
 # If not go back to wait
 # go to top
 
-def scan():
+def scan(duration):
 	''' Run tcpdump network scan '''
-	duration = 4 # Scan time in seconds
 	file_name = 'top' # File name, top or bottom depending on LAN tap
 	interface = 'ens33' # Hardcode for each device?
 	subprocess.run(['sudo','timeout',str(duration)+'s', 'tcpdump', '-i', interface, '-s', '65535', '-w', file_name+'.pcap'])
@@ -30,9 +32,14 @@ def merge():
 	subprocess.run(['mergecap',targets[0], targets[1], '-w', output])
 	return
 
+def scp():
+	dest = './bot.pcap'
+	source = 'root@10.88.1.50:./bot.pcap'
+	subprocess.run(['scp',source,dest])
+	return
+
 def checkAlive():
 	''' Check if the host is connected to the network '''
-	light_ip = '8.8.8.8'
 	count = 3
 	print('Checking if device is up.')
 	result = ping(light_ip, count)
@@ -41,38 +48,46 @@ def checkAlive():
 	else:
 		return False
 
-def connect():
+def connect(addr):
 	''' Connect to the TCP server on second device '''
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Create socket
-	server_address = ('localhost', 10000) # Set target 
+	server_address = (addr, 10000) # Set target 
 	print(f'Connecting to {server_address[0]} at port {server_address[1]}')
 	sock.connect(server_address)
 	return sock
 
-def loop():
+def loop(duration, wait_time, addr):
 	''' Main body of program '''
-	wait_time = 10 # Time between scan attempts in seconds
 	print(f'Waiting for: {wait_time} seconds')
 	time.sleep(wait_time)
 	try:
 		if checkAlive():
 			print('Device OK: Proceeding')
-			sock = connect()
+			sock = connect(addr)
 			sock.sendall(b'SCAN') # Connect to sever, initiate scan
 			reply = sock.recv(4)
 			if reply: # If data returned scan start
-				# scan()
-				print("SCANNING\n\n") # Testing purposes
+				print(f"Begining scan: Duration {duration} seconds")
+				scan(duration)
+				# print("SCANNING\n\n") # Testing purposes
+				print("Scan complete\nGetting file from server.")
+				# DO MORE
 			else:
 				print("Restarting")
 		else:
 			print('Host Unreachable')
 	finally:
 		sock.close()
-		loop()
+		loop(duration, wait_time, addr)
 def main():
+	''' Varaibles kept together for ease of testing '''
+	duration = 4 # Scan time in seconds
+	wait_time = 10 # Time between scan attempts in seconds
+	addr = 'localhost'
+	''' ------------------------------------------- '''
+
 	input("WARNING: IS PROGRAM RUNNING AS ROOT? \nWILL FAIL IF NOT\nANY KEY TO CONTINUE")
-	loop()
+	loop(duration, wait_time, addr)
 
 if __name__ == '__main__':
 	main()
