@@ -32,8 +32,9 @@ def merge():
 
 def checkAlive():
 	''' Check if the host is connected to the network '''
-	light_ip = '10.88.1.52'
+	light_ip = '8.8.8.8'
 	count = 3
+	print('Checking if device is up.')
 	result = ping(light_ip, count)
 	if result.success(): # Successful ping evaluates to True
 		return True
@@ -44,18 +45,26 @@ def connect():
 	''' Connect to the TCP server on second device '''
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Create socket
 	server_address = ('localhost', 10000) # Set target 
-	print(f'connecting to {server_address[0]} port {server_address[1]}')
+	print(f'Connecting to {server_address[0]} at port {server_address[1]}')
 	sock.connect(server_address)
-	return
+	return sock
 
 def loop():
 	''' Main body of program '''
-	wait_time = 120 # Time between scan attempts in seconds
+	wait_time = 5 # Time between scan attempts in seconds
+	print(f'Waiting for: {wait_time} seconds')
 	begin = time.time()
 	while True:
 		if int(time.time()-begin) > wait_time:
 			if checkAlive():
-				# DO SOMETHING
+				print('Device OK: Proceeding')
+				sock = connect()
+				msg = b'Test Message'
+				sock.sendall(msg)
+				
+				reply = sock.recv(16)
+				print(f'Recieved: {reply}')
+				return
 			else:
 				print('Host Unreachable')
 				loop()
@@ -63,7 +72,8 @@ def loop():
 			continue
 
 def main():
-	pass
+	input("WARNING: IS PROGRAM RUNNING AS ROOT? \nWILL FAIL IF NOT\nANY KEY TO CONTINUE")
+	loop()
 
 if __name__ == '__main__':
 	main()
