@@ -72,7 +72,11 @@ def loop(duration, wait_time, addr):
 				scan(duration)
 				# print("SCANNING\n\n") # Testing purposes
 				print("Scan complete\nGetting file from server.")
-				# DO MORE
+				scp()
+				print("Got file\nMerging files")
+				merge() # Need to add try - catch to prevent breaking
+				print("Files Merged\nHashing")
+				# DO STUFF
 			else:
 				print("Restarting")
 		else:
