@@ -1,35 +1,49 @@
 import socket
+import time
 import sys
 
+def scan():
+	''' Run tcpdump network scan '''
+	duration = 4 # Scan time in seconds
+	file_name = 'bot' # File name, top or bottom depending on LAN tap
+	interface = 'ens33' # Hardcode for each device?
+	subprocess.run(['sudo','timeout',str(duration)+'s', 'tcpdump', '-i', interface, '-s', '65535', '-w', file_name+'.pcap'])
+	return
+
 def startServer():
+	''' Start sever to accept TCP connection from client program '''
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Create socket
 	server_address = ('localhost', 10000) # Assign IP and Port
-	print(f'Starting server {server_address[0]} at port {server_address[1]}') 
+	print(f'Starting server {server_address[0]} at port {server_address[1]}')
+	sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) # Allow resuse of socket
 	sock.bind(server_address) # Bind socket
 	sock.listen(1) # Listen for connections
 	return sock
 
 def listen(sock):
+	''' Listen for incoming connection '''
 	while True:
 		print('Waiting for connection')
 		connection, client_address = sock.accept()
 		try:
 			print('Connection from: ', client_address)
-			data = connection.recv(16)
+			data = connection.recv(4)
 			print(f'Received: {data}')
-			if data:
-				connection.sendall(b'Success')
+			if data: # If data not empty reply then start scan
+				connection.sendall(b'SCAN')
+				# scan()
+				print("SCANNING\n\n") # Testing purposes
+			else:
+				break
 		finally:
-			# Clean up the connection
 			connection.close()
+			sock.close() # Need to close to allow anoher to be created
 			return
-
-
 
 def main():
 	sock = startServer()
 	listen(sock)
-	print("DONE")
+	return main()
 
 if __name__ == '__main__':
 	main()

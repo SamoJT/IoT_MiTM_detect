@@ -51,26 +51,25 @@ def connect():
 
 def loop():
 	''' Main body of program '''
-	wait_time = 5 # Time between scan attempts in seconds
+	wait_time = 10 # Time between scan attempts in seconds
 	print(f'Waiting for: {wait_time} seconds')
-	begin = time.time()
-	while True:
-		if int(time.time()-begin) > wait_time:
-			if checkAlive():
-				print('Device OK: Proceeding')
-				sock = connect()
-				msg = b'Test Message'
-				sock.sendall(msg)
-				
-				reply = sock.recv(16)
-				print(f'Recieved: {reply}')
-				return
+	time.sleep(wait_time)
+	try:
+		if checkAlive():
+			print('Device OK: Proceeding')
+			sock = connect()
+			sock.sendall(b'SCAN') # Connect to sever, initiate scan
+			reply = sock.recv(4)
+			if reply: # If data returned scan start
+				# scan()
+				print("SCANNING\n\n") # Testing purposes
 			else:
-				print('Host Unreachable')
-				loop()
+				print("Restarting")
 		else:
-			continue
-
+			print('Host Unreachable')
+	finally:
+		sock.close()
+		loop()
 def main():
 	input("WARNING: IS PROGRAM RUNNING AS ROOT? \nWILL FAIL IF NOT\nANY KEY TO CONTINUE")
 	loop()
