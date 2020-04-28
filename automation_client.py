@@ -4,6 +4,7 @@ import subprocess
 import socket
 import time
 import sys
+import re
 
 # First run:
 #    set IP address, set interface, generate ssh key server, install ssh key on client 
@@ -36,9 +37,23 @@ def merge():
 def hash():
 	''' Utilise JA3.py and generate hashes from merged pcap file '''
 	ja3 = '/home/sam/Documents/disso/ja3/python/ja3.py'
-	pcap = '/home/sam/Documents/disso/goodCaps/simultaneous_merged.pcap'
-	subprocess.call(['python3', ja3 , '--json', pcap])
-	return
+	pcap = '/home/sam/Documents/disso/code/IoT_verification/merged.pcap'
+	ja3_out = subprocess.check_output(['python3', ja3 , '--json', pcap])
+	with open('ja3.txt','w') as f:
+		f.write(ja3_out.decode()) # Write the output of ja3 to a file
+	with open('ja3.txt', 'r') as f:
+		hash_list = set(re.findall(r'\w{32}',f.read())) # Find digests and remove duplicates
+	return hash_list
+
+def verify(hash_list):
+	with open("trusted.txt", 'r') as t:
+		trusted = t.read()
+		for h in hash_list:
+			if h in trusted:
+				return True
+			else:
+				continue
+		return False
 
 def checkAlive():
 	''' Check if the host is connected to the network '''
@@ -71,8 +86,8 @@ def loop(duration, wait_time, addr):
 			reply = sock.recv(4)
 			if reply: # If data returned scan start
 				print(f"Begining scan: Duration {duration} seconds")
-				scan(duration)
-				# print("SCANNING\n\n") # Testing purposes
+				# scan(duration)
+				print("SCANNING\n\n") # Testing purposes
 				print("Scan complete\nWaiting for file from server")
 				time.sleep(0.75)
 				if path.exists('bot.pcap') != True:
@@ -81,7 +96,12 @@ def loop(duration, wait_time, addr):
 				print("Got file\nMerging files")
 				merge() # Need to add try - catch to prevent breaking
 				print("Files Merged\nHashing")
-				# DO STUFF
+				hash_list = hash()
+				print("Hashes generated\nChecking against trusted")
+				if verify(hash_list):
+					return print("OK")
+				else:
+					return print("THREAT")
 			else:
 				print("Restarting")
 		else:
@@ -91,9 +111,9 @@ def loop(duration, wait_time, addr):
 		loop(duration, wait_time, addr)
 def main():
 	''' Varaibles kept together for ease of testing '''
-	duration = 10 # Scan time in seconds
-	wait_time = 10 # Time between scan attempts in seconds
-	addr = '10.88.1.128'
+	duration = 60 # Scan time in seconds
+	wait_time = 300 # Time between scan attempts in seconds
+	addr = 'localhost'
 	''' ------------------------------------------- '''
 
 	print("WARNING: IS PROGRAM RUNNING AS ROOT? \nWILL FAIL IF NOT\n")

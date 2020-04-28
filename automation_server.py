@@ -21,7 +21,7 @@ def scp():
 def startServer():
 	''' Start sever to accept TCP connection from client program '''
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Create socket
-	server_address = ('10.88.1.128', 10000) # Assign IP and Port
+	server_address = ('localhost', 10000) # Assign IP and Port
 	print(f'Starting server {server_address[0]} at port {server_address[1]}')
 	sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) # Allow resuse of socket
 	sock.bind(server_address) # Bind socket
@@ -40,10 +40,10 @@ def listen(sock, duration):
 			if data: # If data not empty reply then start scan
 				connection.sendall(b'SCAN')
 				print(f"Begining scan: Duration {duration} seconds")
-				scan(duration)
-				# print("SCANNING\n\n") # Testing purposes
+				# scan(duration)
+				print("SCANNING\n\n") # Testing purposes
 				print("Scan complete\nSending file")
-				scp()
+				# scp()
 				print("File sent")
 			else:
 				break
@@ -53,7 +53,7 @@ def listen(sock, duration):
 			return
 
 def main():
-	duration = 10 # Scan time in seconds
+	duration = 60 # Scan time in seconds
 
 	sock = startServer()
 	listen(sock, duration)
