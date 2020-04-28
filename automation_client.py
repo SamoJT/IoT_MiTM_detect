@@ -33,6 +33,13 @@ def merge():
 	subprocess.run(['mergecap',targets[0], targets[1], '-w', output])
 	return
 
+def hash():
+	''' Utilise JA3.py and generate hashes from merged pcap file '''
+	ja3 = '/home/sam/Documents/disso/ja3/python/ja3.py'
+	pcap = '/home/sam/Documents/disso/goodCaps/simultaneous_merged.pcap'
+	subprocess.call(['python3', ja3 , '--json', pcap])
+	return
+
 def checkAlive():
 	''' Check if the host is connected to the network '''
 	count = 3
@@ -67,8 +74,8 @@ def loop(duration, wait_time, addr):
 				scan(duration)
 				# print("SCANNING\n\n") # Testing purposes
 				print("Scan complete\nWaiting for file from server")
-				time.sleep(2)
-				if os.path('bot.pcap') != True:
+				time.sleep(0.75)
+				if path.exists('bot.pcap') != True:
 					print("Failed to get file")
 					return
 				print("Got file\nMerging files")
