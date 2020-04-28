@@ -41,6 +41,7 @@ def scp():
 def checkAlive():
 	''' Check if the host is connected to the network '''
 	count = 3
+	light_ip = '8.8.8.8'
 	print('Checking if device is up.')
 	result = ping(light_ip, count)
 	if result.success(): # Successful ping evaluates to True
@@ -81,12 +82,12 @@ def loop(duration, wait_time, addr):
 		loop(duration, wait_time, addr)
 def main():
 	''' Varaibles kept together for ease of testing '''
-	duration = 4 # Scan time in seconds
+	duration = 10 # Scan time in seconds
 	wait_time = 10 # Time between scan attempts in seconds
 	addr = 'localhost'
 	''' ------------------------------------------- '''
 
-	input("WARNING: IS PROGRAM RUNNING AS ROOT? \nWILL FAIL IF NOT\nANY KEY TO CONTINUE")
+	print("WARNING: IS PROGRAM RUNNING AS ROOT? \nWILL FAIL IF NOT\n")
 	loop(duration, wait_time, addr)
 
 if __name__ == '__main__':

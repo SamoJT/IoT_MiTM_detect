@@ -1,6 +1,9 @@
+import subprocess
 import socket
 import time
 import sys
+
+print("WARNING: IS PROGRAM RUNNING AS ROOT? \nWILL FAIL IF NOT\n")
 
 def scan(duration):
 	''' Run tcpdump network scan '''
@@ -34,7 +37,6 @@ def listen(sock, duration):
 				scan(duration)
 				# print("SCANNING\n\n") # Testing purposes
 				print("Scan complete")
-				
 			else:
 				break
 		finally:
@@ -43,7 +45,7 @@ def listen(sock, duration):
 			return
 
 def main():
-	duration = 4 # Scan time in seconds
+	duration = 10 # Scan time in seconds
 
 	sock = startServer()
 	listen(sock, duration)
