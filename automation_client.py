@@ -1,4 +1,5 @@
 from pythonping import ping
+from os import path
 import subprocess
 import socket
 import time
@@ -21,7 +22,7 @@ import sys
 def scan(duration):
 	''' Run tcpdump network scan '''
 	file_name = 'top' # File name, top or bottom depending on LAN tap
-	interface = 'ens33' # Hardcode for each device?
+	interface = 'wlan0' # Hardcode for each device?
 	subprocess.run(['sudo','timeout',str(duration)+'s', 'tcpdump', '-i', interface, '-s', '65535', '-w', file_name+'.pcap'])
 	return
 
@@ -32,16 +33,10 @@ def merge():
 	subprocess.run(['mergecap',targets[0], targets[1], '-w', output])
 	return
 
-def scp():
-	dest = './bot.pcap'
-	source = 'root@10.88.1.50:./bot.pcap'
-	subprocess.run(['scp',source,dest])
-	return
-
 def checkAlive():
 	''' Check if the host is connected to the network '''
 	count = 3
-	light_ip = '8.8.8.8'
+	light_ip = '8.8.8.8' # 8.8.8.8 is testing value
 	print('Checking if device is up.')
 	result = ping(light_ip, count)
 	if result.success(): # Successful ping evaluates to True
@@ -71,8 +66,11 @@ def loop(duration, wait_time, addr):
 				print(f"Begining scan: Duration {duration} seconds")
 				scan(duration)
 				# print("SCANNING\n\n") # Testing purposes
-				print("Scan complete\nGetting file from server.")
-				scp()
+				print("Scan complete\nWaiting for file from server")
+				time.sleep(2)
+				if os.path('bot.pcap') != True:
+					print("Failed to get file")
+					return
 				print("Got file\nMerging files")
 				merge() # Need to add try - catch to prevent breaking
 				print("Files Merged\nHashing")
@@ -88,7 +86,7 @@ def main():
 	''' Varaibles kept together for ease of testing '''
 	duration = 10 # Scan time in seconds
 	wait_time = 10 # Time between scan attempts in seconds
-	addr = 'localhost'
+	addr = '10.88.1.128'
 	''' ------------------------------------------- '''
 
 	print("WARNING: IS PROGRAM RUNNING AS ROOT? \nWILL FAIL IF NOT\n")
