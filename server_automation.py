@@ -1,3 +1,4 @@
+#!/usr/bin/env python3.6
 import subprocess
 import socket
 import time
@@ -18,7 +19,7 @@ def scp():
 	subprocess.run(['scp',src,dest])
 	return
 
-def startServer():
+def start_server():
 	''' Start sever to accept TCP connection from client program '''
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Create socket
 	server_address = ('localhost', 10000) # Assign IP and Port
@@ -40,8 +41,8 @@ def listen(sock, duration):
 			if data: # If data not empty reply then start scan
 				connection.sendall(b'SCAN')
 				print(f"Begining scan: Duration {duration} seconds")
-				# scan(duration)
-				print("SCANNING\n\n") # Testing purposes
+				scan(duration)
+				# print("SCANNING\n\n") # Testing purposes
 				print("Scan complete\nSending file")
 				# scp()
 				print("File sent")
@@ -55,7 +56,7 @@ def listen(sock, duration):
 def main():
 	duration = 60 # Scan time in seconds
 
-	sock = startServer()
+	sock = start_server()
 	listen(sock, duration)
 	return main()
 
