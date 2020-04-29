@@ -47,8 +47,8 @@ def hash():
 
 def verify(hash_list):
 	with open("trusted.txt", 'r') as t:
-		trusted = t.read()
-		for h in hash_list:
+		trusted = t.read() 
+		for h in hash_list: # Iterate though generated hashes, compare with trusted in file - if one found OK else CAUTION
 			if h in trusted:
 				return True
 			else:
@@ -101,7 +101,7 @@ def loop(duration, wait_time, addr):
 				if verify(hash_list):
 					return print("OK")
 				else:
-					return print("THREAT")
+					return print("POTENTIAL THREAT")
 			else:
 				print("Restarting")
 		else:
