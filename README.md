@@ -1,2 +1,2 @@
 # IoT_verification
-A Python script to automate the collection of network traffic, produce JA3 hashes, and compare these against control versions.
+Two Python scripts to automatically generate TLS fingerprints using JA3 and check these against trusted values; negative result possibly indicates that the IoT device has been compromised. 
